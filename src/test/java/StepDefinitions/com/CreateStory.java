@@ -8,6 +8,7 @@ import Pojo.ResponseBodyRestApi;
 import Pojo.pojoJiraSession.SessionForUSer;
 import Utils.ConfigReader;
 import Utils.Driver;
+import Utils.PayloadUtils;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -34,11 +35,14 @@ public class CreateStory {
     IssuePage issuePage = new IssuePage();
     LoginPage loginPage = new LoginPage();
 
-    public String userName;
-    public String value;
+    public static String userName;
+    public static String value;
 
     public String key;
 
+    public static String summary = "Login Functionality";
+    public static String description = "Checking Functions";
+    public static String name = "Story";
 //    @Before
 //    public void setUp2(){
 //
@@ -75,20 +79,32 @@ public class CreateStory {
                 .expectStatusCode(201).expectContentType(ContentType.JSON)
                 .build();
         Response response1 = given().spec(requestSpecification)
-                .body(filePalyload)
+                .body(PayloadUtils.getJiraIssuePayload(summary,description,name)) // filePalyload
                 .when().post("http://localhost:8080/rest/api/2/issue")
                 .then().assertThat().spec(responseSpecification)
                 .extract().response();
+
+        ResponseBodyRestApi responseBodyRestApi = response1.getBody().as(ResponseBodyRestApi.class);
+
+        System.out.println(responseBodyRestApi.getId());
+        key =responseBodyRestApi.getKey();
+
+
+
+
 
 //        ResponseBodyRestApi responseBodyRestApi = given().spec(requestSpecification)
 //                .body(filePalyload)
 //                .when().post("http://localhost:8080/rest/api/2/issue")
 //                .then().spec(responseSpecification)
 //                .extract().as(ResponseBodyRestApi.class);
-        ResponseBodyRestApi responseBodyRestApi = response1.getBody().as(ResponseBodyRestApi.class);
 
-        System.out.println(responseBodyRestApi.getId());
-        key =responseBodyRestApi.getKey();
+        //        ResponseBodyRestApi responseBodyRestApi = given().accept(ContentType.JSON).contentType(ContentType.JSON).header("Cookie",userName+"="+value)
+//                .body(filePalyload)
+//                .when().post("http://localhost:8080/rest/api/2/issue")
+//                .then().assertThat().statusCode(201).and().contentType(ContentType.JSON)
+//                .extract().as(ResponseBodyRestApi.class);
+
 
 
     }
@@ -102,12 +118,11 @@ public class CreateStory {
         loginPage.submitButton.click();
         Thread.sleep(1000);
 
-
-
     }
 
     @When("the user click last created one")
     public void the_user_click_last_created_one() throws InterruptedException {
+
 
         Thread.sleep(500);
         int length=backlogPage.stories.size()-1;
